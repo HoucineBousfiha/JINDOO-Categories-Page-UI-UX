@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Category Landing Page</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        width: 100%;
+      }
+
+      .page-title {
+        text-align: center;
+        color: white;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 3rem;
+        text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      }
+
+      .categories-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2rem;
+        justify-content: center;
+      }
+
+      .category-card {
+        position: relative;
+        aspect-ratio: 1;
+        border-radius: 16px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        background: #000;
+      }
+
+      .category-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      }
+
+      .category-video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+      }
+
+      .category-card:hover .category-video {
+        transform: scale(1.05);
+      }
+
+      .category-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+          45deg,
+          rgba(0, 0, 0, 0.4),
+          rgba(0, 0, 0, 0.2)
+        );
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        text-align: center;
+        transition: all 0.3s ease;
+      }
+
+      .category-title {
+        color: white;
+        font-size: 1.25rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        text-shadow: 0 2px 15px rgba(0, 0, 0, 0.6);
+        transition: all 0.3s ease;
+        z-index: 2;
+        text-align: center;
+        margin: 0;
+        margin-top: 60px;
+        padding: 0 20px;
+        line-height: 1.2;
+      }
+
+      .discover-button {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.3s ease;
+        margin-top: 1rem;
+        background: rgba(255, 255, 255, 0.2);
+        border: 2px solid white;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 50px;
+        font-size: 1rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        backdrop-filter: blur(10px);
+        cursor: pointer;
+      }
+
+      .discover-button:hover {
+        background: white;
+        color: #7c3aed;
+        transform: translateY(20px) scale(1.05);
+      }
+
+      .arrow-icon {
+        transition: transform 0.3s ease;
+      }
+
+      .discover-button:hover .arrow-icon {
+        transform: translateX(4px);
+      }
+
+      .category-card:hover .category-overlay {
+        background: linear-gradient(
+          45deg,
+          rgba(124, 58, 237, 0.8),
+          rgba(168, 85, 247, 0.8)
+        );
+      }
+
+      .category-card:hover .discover-button {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .category-card:hover .category-title {
+        transform: translateY(-8px);
+      }
+
+      /* Tooltip Styles */
+      .info-icon {
+        position: absolute;
+        bottom: 12px;
+        right: 12px;
+        width: 32px;
+        height: 32px;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        z-index: 10;
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+      }
+
+      .info-icon:hover {
+        background: white;
+        transform: scale(1.1);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      }
+
+      .info-icon svg {
+        width: 16px;
+        height: 16px;
+        color: #7c3aed;
+        transition: color 0.3s ease;
+      }
+
+      .info-icon:hover svg {
+        color: #5b21b6;
+      }
+
+      .tooltip {
+        position: absolute;
+        bottom: 50px;
+        right: 12px;
+        background: white;
+        color: #1f2937;
+        padding: 16px;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        font-size: 0.875rem;
+        line-height: 1.4;
+        width: 280px;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(10px) scale(0.95);
+        transition: all 0.3s ease;
+        z-index: 20;
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .tooltip::before {
+        content: "";
+        position: absolute;
+        bottom: -8px;
+        right: 20px;
+        width: 0;
+        height: 0;
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        border-top: 8px solid white;
+      }
+
+      .info-icon:hover .tooltip {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0) scale(1);
+      }
+
+      .tooltip-title {
+        font-weight: 600;
+        color: #7c3aed;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+      }
+
+      .tooltip-content {
+        color: #4b5563;
+        font-size: 0.85rem;
+      }
+
+      .tooltip-list {
+        list-style: none;
+        padding: 0;
+        margin: 8px 0 0 0;
+      }
+
+      .tooltip-list li {
+        padding: 2px 0;
+        position: relative;
+        padding-left: 16px;
+      }
+
+      .tooltip-list li::before {
+        content: "•";
+        color: #7c3aed;
+        position: absolute;
+        left: 0;
+        font-weight: bold;
+      }
+
+      /* Responsive design */
+      @media (max-width: 1024px) {
+        .categories-grid {
+          grid-template-columns: repeat(2, 1fr);
+          gap: 1.5rem;
+        }
+
+        .category-overlay {
+          padding: 15px;
+        }
+
+        .tooltip {
+          width: 260px;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .page-title {
+          font-size: 2rem;
+          margin-bottom: 2rem;
+        }
+
+        .categories-grid {
+          grid-template-columns: 1fr;
+          gap: 1.5rem;
+        }
+
+        .category-title {
+          font-size: 1rem;
+          letter-spacing: 2px;
+          padding: 0 15px;
+        }
+
+        .category-overlay {
+          padding: 15px;
+        }
+
+        .tooltip {
+          width: 240px;
+          right: 8px;
+          bottom: 45px;
+        }
+
+        .info-icon {
+          bottom: 8px;
+          right: 8px;
+          width: 28px;
+          height: 28px;
+        }
+
+        .info-icon svg {
+          width: 14px;
+          height: 14px;
+        }
+      }
+
+      /* Background video placeholder styling */
+      .video-placeholder {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          45deg,
+          #ff6b6b 0%,
+          #4ecdc4 25%,
+          #45b7d1 50%,
+          #96ceb4 75%,
+          #ffeaa7 100%
+        );
+        background-size: 400% 400%;
+        animation: gradientShift 8s ease infinite;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+        font-weight: 600;
+      }
+
+      @keyframes gradientShift {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="page-title">JINDOO Categories Page</h1>
+
+      <div class="categories-grid">
+        <div class="category-card" onclick="handleCategoryClick('animals')">
+          <video class="category-video" muted loop autoplay>
+            <source
+              src="A smooth, realistic animation of the entrance to the 'JINDOO' animal souq. The scene begins with a steady forward dolly motion approaching the arched clay doorway with 'JINDOO' sign above. Soft curtains gently sway.mp4"
+              type="video/mp4"
+            />
+          </video>
+
+          <div class="category-overlay">
+            <h2 class="category-title">Animals</h2>
+            <button class="discover-button">
+              Discover
+              <svg
+                class="arrow-icon"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M5 12h14" />
+                <path d="m12 5 7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+
+          <div class="info-icon">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="16" x2="12" y2="12" />
+              <line x1="12" y1="8" x2="12.01" y2="8" />
+            </svg>
+            <div class="tooltip">
+              <div class="tooltip-title">Animals Category</div>
+              <div class="tooltip-content">
+                Find everything for your pets and animals:
+                <ul class="tooltip-list">
+                  <li>Dogs & Cats</li>
+                  <li>Birds & Fish</li>
+                  <li>Pet Accessories</li>
+                  <li>Animal Food & Care</li>
+                  <li>Farm Animals</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="category-card" onclick="handleCategoryClick('home')">
+          <video class="category-video" muted loop autoplay>
+            <source
+              src="A Moroccan-modern fusion living space with traditional Moroccan zellige tilework, carved wooden furniture, and seamlessly integrated smart appliances. A soft breeze causes the curtains to sway gently while sunlight.mp4"
+              type="video/mp4"
+            />
+          </video>
+
+          <div class="category-overlay">
+            <h2 class="category-title">Maison et Équipements</h2>
+            <button class="discover-button">
+              Discover
+              <svg
+                class="arrow-icon"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M5 12h14" />
+                <path d="m12 5 7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+
+          <div class="info-icon">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="16" x2="12" y2="12" />
+              <line x1="12" y1="8" x2="12.01" y2="8" />
+            </svg>
+            <div class="tooltip">
+              <div class="tooltip-title">Home & Equipment</div>
+              <div class="tooltip-content">
+                Everything for your home and living:
+                <ul class="tooltip-list">
+                  <li>Furniture & Decor</li>
+                  <li>Kitchen Appliances</li>
+                  <li>Electronics & Tech</li>
+                  <li>Garden & Outdoor</li>
+                  <li>Tools & Hardware</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="category-card" onclick="handleCategoryClick('automotive')">
+          <video class="category-video" muted loop autoplay>
+            <source
+              src="Animate a moody sunset scene set in Casablanca, Morocco, in front of the iconic Hassan II Mosque. The environment is calm and immersive, with gentle movement in the clouds and a soft breeze swaying tall grasses in .mp4"
+              type="video/mp4"
+            />
+          </video>
+
+          <div class="category-overlay">
+            <h2 class="category-title">Auto - Moto</h2>
+            <button class="discover-button">
+              Discover
+              <svg
+                class="arrow-icon"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M5 12h14" />
+                <path d="m12 5 7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+
+          <div class="info-icon">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="16" x2="12" y2="12" />
+              <line x1="12" y1="8" x2="12.01" y2="8" />
+            </svg>
+            <div class="tooltip">
+              <div class="tooltip-title">Auto - Moto</div>
+              <div class="tooltip-content">
+                Vehicles and automotive services:
+                <ul class="tooltip-list">
+                  <li>Cars & Motorcycles</li>
+                  <li>Auto Parts & Accessories</li>
+                  <li>Maintenance & Repair</li>
+                  <li>Tires & Wheels</li>
+                  <li>Vehicle Insurance</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="category-card" onclick="handleCategoryClick('jobs')">
+          <video class="category-video" muted loop autoplay>
+            <source
+              src="A modern, sunlit Moroccan office environment filled with young professionals and interns. Subtle, realistic movement_ people nodding, smiling, and occasionally looking at each other while speaking. One person types.mp4"
+              type="video/mp4"
+            />
+          </video>
+
+          <div class="category-overlay">
+            <h2 class="category-title">Offres d'emploi et stages</h2>
+            <button class="discover-button">
+              Discover
+              <svg
+                class="arrow-icon"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M5 12h14" />
+                <path d="m12 5 7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+
+          <div class="info-icon">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="16" x2="12" y2="12" />
+              <line x1="12" y1="8" x2="12.01" y2="8" />
+            </svg>
+            <div class="tooltip">
+              <div class="tooltip-title">Jobs & Internships</div>
+              <div class="tooltip-content">
+                Career opportunities and development:
+                <ul class="tooltip-list">
+                  <li>Full-time Positions</li>
+                  <li>Part-time & Freelance</li>
+                  <li>Internships & Training</li>
+                  <li>Remote Work</li>
+                  <li>Career Services</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="category-card" onclick="handleCategoryClick('beauty')">
+          <video class="category-video" muted loop autoplay>
+            <source
+              src="A peaceful Moroccan-inspired spa scene comes to life with soft natural movement. A young woman in a beige bathrobe and towel wrapped around her head gently applies a green clay mask to her cheek using a brush. Her .mp4"
+              type="video/mp4"
+            />
+          </video>
+
+          <div class="category-overlay">
+            <h2 class="category-title">Beauté et Santé</h2>
+            <button class="discover-button">
+              Discover
+              <svg
+                class="arrow-icon"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M5 12h14" />
+                <path d="m12 5 7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+
+          <div class="info-icon">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="16" x2="12" y2="12" />
+              <line x1="12" y1="8" x2="12.01" y2="8" />
+            </svg>
+            <div class="tooltip">
+              <div class="tooltip-title">Beauty & Health</div>
+              <div class="tooltip-content">
+                Products and services for wellness:
+                <ul class="tooltip-list">
+                  <li>Skincare & Cosmetics</li>
+                  <li>Health Supplements</li>
+                  <li>Spa & Wellness</li>
+                  <li>Fitness Equipment</li>
+                  <li>Medical Services</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="category-card"
+          onclick="handleCategoryClick('miscellaneous')"
+        >
+          <video class="category-video" muted loop autoplay>
+            <source
+              src="A realistic, high-end product video of a clean wooden table with a neatly arranged set of miscellaneous items representing a _'Divers_' category for an e-commerce brand called _'JINDOO_'. The video includes soft na.mp4"
+              type="video/mp4"
+            />
+          </video>
+
+          <div class="category-overlay">
+            <h2 class="category-title">Divers</h2>
+            <button class="discover-button">
+              Discover
+              <svg
+                class="arrow-icon"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M5 12h14" />
+                <path d="m12 5 7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+
+          <div class="info-icon">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="16" x2="12" y2="12" />
+              <line x1="12" y1="8" x2="12.01" y2="8" />
+            </svg>
+            <div class="tooltip">
+              <div class="tooltip-title">Miscellaneous</div>
+              <div class="tooltip-content">
+                Various products and services:
+                <ul class="tooltip-list">
+                  <li>Books & Media</li>
+                  <li>Sports & Hobbies</li>
+                  <li>Art & Collectibles</li>
+                  <li>Services & Support</li>
+                  <li>Other Categories</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function handleCategoryClick(category) {
+        console.log(`Navigating to ${category} category`);
+        // Add your navigation logic here
+        // Example: window.location.href = `/categories/${category}`;
+
+        // For demonstration, show an alert
+        alert(`Exploring ${category.toUpperCase()} category!`);
+      }
+
+      // Optional: Add keyboard navigation
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") {
+          const focused = document.activeElement;
+          if (focused.classList.contains("category-card")) {
+            focused.click();
+          }
+        }
+      });
+
+      // Add click event listeners to discover buttons
+      document.querySelectorAll(".discover-button").forEach((button) => {
+        button.addEventListener("click", function (e) {
+          e.stopPropagation(); // Prevent card click
+          const card = this.closest(".category-card");
+          const category = card.onclick.toString().match(/'([^']+)'/)[1];
+          handleCategoryClick(category);
+        });
+      });
+
+      // Prevent tooltip clicks from triggering card navigation
+      document.querySelectorAll(".info-icon").forEach((icon) => {
+        icon.addEventListener("click", function (e) {
+          e.stopPropagation();
+        });
+      });
+    </script>
+  </body>
+</html>
